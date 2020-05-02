@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -17,14 +17,14 @@ func main() {
 
 	file, err := os.Open(path.Join(corporaDirName, filename))
 	if err != nil {
-		log.Fatalf("Failed to read corpus file: %v\n", err)
+		log.Fatalf("Failed to open corpus file: %v\n", err)
 	}
 	defer file.Close()
 
-	s := bufio.NewScanner(file)
-	numLines := 10
-	for i := 0; i < numLines; i++ {
-		s.Scan()
-		fmt.Println(s.Text())
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatalf("Failed to read corpus file: %v\n", err)
 	}
+	hmm := NewHMM(string(content))
+	fmt.Println(hmm)
 }
