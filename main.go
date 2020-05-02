@@ -33,7 +33,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create new Discord bot: %v\n", err)
 	}
-	bot.AddHandlers()
 	err = bot.Start()
 	if err != nil {
 		log.Fatalf("Failed to spin up Discord bot: %v\n", err)

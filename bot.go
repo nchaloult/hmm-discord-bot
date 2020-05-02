@@ -9,9 +9,12 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// DiscordHandler describes objects which register handler functions to a Discord session.
-type DiscordHandler interface {
-	AddHandlers()
+// Starter describes objects which perform necessary procedures before spinning up a Discord bot,
+// and then spin up a Discord bot.
+//
+// I need to come up with a better name for this interface lol
+type Starter interface {
+	Start()
 }
 
 // Bot establishes a new Discord session and is invoked by commands in Discord messages.
@@ -38,6 +41,8 @@ func NewBot(token, prefix string, hmm *HMM) (*Bot, error) {
 
 // Start opens a websocket connection with Discord and starts listening for events.
 func (b *Bot) Start() error {
+	b.addHandlers()
+
 	err := b.dg.Open()
 	if err != nil {
 		return err
@@ -68,7 +73,7 @@ func messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-// AddHandlers registers all of this bot's handler functions with the bot's Discord session.
-func (b *Bot) AddHandlers() {
+// addHandlers registers all of this bot's handler functions with the bot's Discord session.
+func (b *Bot) addHandlers() {
 	b.dg.AddHandler(messageCreateHandler)
 }
