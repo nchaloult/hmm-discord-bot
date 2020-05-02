@@ -7,6 +7,7 @@ corpus.
 
 1. Create a `.env` file in the root dir of this project
     * Either `$ mv .env.sample .env`
+        * If you do this, then you'll need to replace the `BOT_TOKEN` var with your own bot's token
     * Or `$ touch .env` and fill it up yourself
 1. Place your corpus file(s) in the `/corpora` dir
     * See the README in `/corpora` for more info about corpus files
