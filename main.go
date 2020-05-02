@@ -12,6 +12,7 @@ import (
 const corporaDirName = "corpora"
 
 func main() {
+	botname := os.Getenv("BOT_NAME")
 	prefix := os.Getenv("BOT_PREFIX")
 	token := os.Getenv("BOT_TOKEN")
 	filename := os.Getenv("FILENAME")
@@ -29,7 +30,7 @@ func main() {
 	hmm := NewHMM(string(content), 5)
 
 	// Create a Discord bot and spin it up.
-	bot, err := NewBot(token, prefix, hmm)
+	bot, err := NewBot(botname, prefix, token, hmm)
 	if err != nil {
 		log.Fatalf("Failed to create new Discord bot: %v\n", err)
 	}

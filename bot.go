@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -20,13 +21,14 @@ type Starter interface {
 // Bot establishes a new Discord session and is invoked by commands in Discord messages.
 type Bot struct {
 	dg     *discordgo.Session
+	name   string
 	prefix string
 	hmm    *HMM
 }
 
 // NewBot returns a pointer to a new Bot initialized with the providen token, bot prefix, and hidden
 // Markov model to generate content.
-func NewBot(token, prefix string, hmm *HMM) (*Bot, error) {
+func NewBot(name, prefix, token string, hmm *HMM) (*Bot, error) {
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		return nil, err
@@ -34,6 +36,7 @@ func NewBot(token, prefix string, hmm *HMM) (*Bot, error) {
 
 	return &Bot{
 		dg:     dg,
+		name:   name,
 		prefix: prefix,
 		hmm:    hmm,
 	}, nil
@@ -61,19 +64,22 @@ func (b *Bot) Start() error {
 
 // messageCreateHandler is called every time a new message is posted in a a channel that the bot has
 // access to.
-func messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages posted by the bot.
 	// Just to save CPU cycles, even though they're cheap ;)
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
-	if m.Content == "ping" {
-		s.ChannelMessageSend(m.ChannelID, "pong!")
+	prefixAndName := b.prefix + b.name
+	if strings.HasPrefix(m.Content, prefixAndName) {
+		content := strings.TrimPrefix(m.Content, prefixAndName)
+		// Just echo content for now
+		s.ChannelMessageSend(m.ChannelID, content)
 	}
 }
 
 // addHandlers registers all of this bot's handler functions with the bot's Discord session.
 func (b *Bot) addHandlers() {
-	b.dg.AddHandler(messageCreateHandler)
+	b.dg.AddHandler(b.messageCreateHandler)
 }
