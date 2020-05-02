@@ -54,7 +54,7 @@ func (b *Bot) Start() error {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
-	fmt.Println("Spinning down....")
+	fmt.Println("\nSpinning down....")
 	b.dg.Close()
 	return nil
 }
