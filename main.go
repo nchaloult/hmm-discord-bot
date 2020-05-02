@@ -27,5 +27,5 @@ func main() {
 	}
 	hmm := NewHMM(string(content), 5)
 
-	fmt.Println(hmm.GenerateSpeechWithNumWords(20))
+	fmt.Println(hmm.GenerateSpeechBeginningWithWord("that"))
 }
