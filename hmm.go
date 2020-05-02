@@ -65,6 +65,23 @@ func (h *HMM) GenerateSpeech() string {
 	return strings.TrimSpace(output)
 }
 
+// GenerateSpeechWithNumWords returns a piece of generated text with the provided number of words.
+func (h *HMM) GenerateSpeechWithNumWords(numWords int) string {
+	var speech []string
+
+	n := len(h.firstWords)
+	rand.Seed(time.Now().Unix())
+	curWord := h.firstWords[rand.Intn(n)]
+
+	for i := 0; i < numWords; i++ {
+		speech = append(speech, curWord)
+		curWord = getNextWord(curWord, h.probMap)
+	}
+
+	output := strings.Join(speech, " ")
+	return strings.TrimSpace(output)
+}
+
 // getWords performs input sanitization on the provided string, and splits it up into a slice of
 // words.
 //
