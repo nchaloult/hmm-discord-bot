@@ -25,6 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to read corpus file: %v\n", err)
 	}
-	hmm := NewHMM(string(content))
-	fmt.Println(hmm)
+	hmm := NewHMM(string(content), 5)
+
+	fmt.Println(hmm.GenerateSpeech())
 }
