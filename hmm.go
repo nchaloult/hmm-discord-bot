@@ -105,6 +105,24 @@ func (h *HMM) GenerateSpeechBeginningWithWord(firstWord string) string {
 	return strings.TrimSpace(output)
 }
 
+// GenerateSpeechBeginningWithWordAndWithNumWords returns a piece of generated text with the
+// provided number of words, kicking off the generation process with the first provided word.
+//
+// If the provided first word is not in the corpus, then a word from the collection of words at the
+// beginning of sentences in the corpus is randomly chosen.
+func (h *HMM) GenerateSpeechBeginningWithWordAndWithNumWords(firstWord string, numWords int) string {
+	var speech []string
+	curWord := firstWord
+
+	for i := 0; i < numWords; i++ {
+		speech = append(speech, curWord)
+		curWord = getNextWord(curWord, h.probMap)
+	}
+
+	output := strings.Join(speech, " ")
+	return strings.TrimSpace(output)
+}
+
 // getWords performs input sanitization on the provided string, and splits it up into a slice of
 // words.
 //
