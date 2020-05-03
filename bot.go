@@ -105,6 +105,11 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 
 	arguments := strings.Split(content, " ")
 	numArgs := len(arguments)
+	// If content is an empty string, then arguments will look like: [""]. Nuke that empty string.
+	if numArgs == 1 && arguments[0] == "" {
+		arguments = nil
+		numArgs = 0
+	}
 
 	// Handle response based on how many arguments were provided in the bot invocation.
 	if numArgs == 0 {

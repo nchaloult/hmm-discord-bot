@@ -32,6 +32,10 @@ func NewHMM(corpus string, maxRetries int) *HMM {
 	words := getWords(corpus)
 	probMap, firstWords := buildHMMFields(words)
 
+	// Seed the pseudo-random number generator once on this HMM object's initialization before
+	// generating any numbers.
+	rand.Seed(time.Now().UnixNano())
+
 	return &HMM{
 		probMap:    probMap,
 		firstWords: firstWords,
@@ -46,18 +50,21 @@ func (h *HMM) GenerateSpeech() string {
 	var speech []string
 	retries := 0
 
-	// Seeding the pseudo-random number generator is necessary:
-	// https://stackoverflow.com/questions/33994677/pick-a-random-value-from-a-go-slice
 	n := len(h.firstWords)
-	rand.Seed(time.Now().Unix())
 	curWord := h.firstWords[rand.Intn(n)]
 
+	finishedFirstSentence := false
 	for retries < h.maxRetries {
 		speech = append(speech, curWord)
 		curWord = getNextWord(curWord, h.probMap)
 
 		if curWord == "\n" {
-			retries += rand.Intn(2) + 1 // Generate int in range: [1, 3]
+			if finishedFirstSentence {
+				retries += rand.Intn(2) + 1 // Generate int in range: [1, 3]
+			} else {
+				finishedFirstSentence = true
+				speech = nil
+			}
 		}
 	}
 
@@ -70,7 +77,6 @@ func (h *HMM) GenerateSpeechWithNumWords(numWords int) string {
 	var speech []string
 
 	n := len(h.firstWords)
-	rand.Seed(time.Now().Unix())
 	curWord := h.firstWords[rand.Intn(n)]
 
 	for i := 0; i < numWords; i++ {
@@ -194,6 +200,5 @@ func getNextWord(curWord string, probMap map[string]map[string]float64) string {
 		probMapKeps[i] = key
 		i++
 	}
-	rand.Seed(time.Now().Unix())
 	return probMapKeps[rand.Intn(n)]
 }
