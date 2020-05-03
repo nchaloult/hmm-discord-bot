@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"regexp"
 	"strings"
 	"syscall"
 
@@ -20,10 +21,11 @@ type Starter interface {
 
 // Bot establishes a new Discord session and is invoked by commands in Discord messages.
 type Bot struct {
-	dg     *discordgo.Session
-	name   string
-	prefix string
-	hmm    *HMM
+	dg            *discordgo.Session
+	name          string
+	prefix        string
+	hmm           *HMM
+	contentRegexp *regexp.Regexp
 }
 
 // NewBot returns a pointer to a new Bot initialized with the providen token, bot prefix, and hidden
@@ -34,11 +36,19 @@ func NewBot(name, prefix, token string, hmm *HMM) (*Bot, error) {
 		return nil, err
 	}
 
+	// This step is kinda expensive. Instead of doing this in messageCreateHandler() every time we
+	// handle a bot invocation, we do this once when the bot is created.
+	reg, err := regexp.Compile("[^a-zA-Z0-9 ]+") // Filtering for alphanumeric values only
+	if err != nil {
+		return nil, err
+	}
+
 	return &Bot{
-		dg:     dg,
-		name:   name,
-		prefix: prefix,
-		hmm:    hmm,
+		dg:            dg,
+		name:          name,
+		prefix:        prefix,
+		hmm:           hmm,
+		contentRegexp: reg,
 	}, nil
 }
 
@@ -81,7 +91,11 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 		return
 	}
 
+	// Input cleanup and sanitization
 	content := strings.TrimPrefix(m.Content, prefixAndName)
+	content = strings.TrimSpace(content)
+	content = strings.ToLower(content)
+	content = b.contentRegexp.ReplaceAllString(content, "")
 	// Just echo content for now
 	s.ChannelMessageSend(m.ChannelID, content)
 }
