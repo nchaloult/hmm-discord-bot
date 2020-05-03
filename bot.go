@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -80,24 +81,62 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-
+	// Look for bot prefix at the beginning of the message.
 	prefixAndName := b.prefix + b.name
 	if !strings.HasPrefix(m.Content, prefixAndName) {
 		return
 	}
-
+	// If anyone was mentioned in the message, don't mess with it.
 	if len(m.Mentions) > 0 {
 		s.ChannelMessageSend(m.ChannelID, "@'ing people isn't supported yet :(")
 		return
 	}
 
-	// Input cleanup and sanitization
+	// Clean up and sanitize input.
 	content := strings.TrimPrefix(m.Content, prefixAndName)
 	content = strings.TrimSpace(content)
 	content = strings.ToLower(content)
 	content = b.contentRegexp.ReplaceAllString(content, "")
-	// Just echo content for now
-	s.ChannelMessageSend(m.ChannelID, content)
+
+	arguments := strings.Split(content, " ")
+	numArgs := len(arguments)
+
+	// Handle response based on how many arguments were provided in the bot invocation.
+	if numArgs == 0 {
+		response := b.hmm.GenerateSpeech()
+		s.ChannelMessageSend(m.ChannelID, response)
+		return
+	}
+	if numArgs == 1 {
+		arg := arguments[0]
+		// Determine if a first word was provided or if a number of words was provided.
+		numWords, err := strconv.Atoi(arg)
+		if err != nil {
+			// Something went wrong trying to convert the first argument to an int. That means the
+			// first argument is a word that the generated text should start with.
+			response := b.hmm.GenerateSpeechBeginningWithWord(arg)
+			s.ChannelMessageSend(m.ChannelID, response)
+			return
+		}
+		// The string to int conversion was successful. Assume that the number passed in is the
+		// number of words that the generated text should have.
+		response := b.hmm.GenerateSpeechWithNumWords(numWords)
+		s.ChannelMessageSend(m.ChannelID, response)
+		return
+	}
+	// len(arguments) is at least 2. If there were more than 2 arguments provided, ignore all of
+	// them except for the first two.
+	firstWord := arguments[0]
+	numWords, err := strconv.Atoi(arguments[1])
+	if err != nil {
+		// Second argument was not a number. Respond with usage instructions.
+		response := fmt.Sprintf("\"%s\" is not a number. Example usage: `%s"+
+			" <firstWord> <numWords>`", arguments[1], prefixAndName)
+		s.ChannelMessageSend(m.ChannelID, response)
+		return
+	}
+	response := b.hmm.GenerateSpeechBeginningWithWordAndWithNumWords(firstWord, numWords)
+	s.ChannelMessageSend(m.ChannelID, response)
 }
 
 // addHandlers registers all of this bot's handler functions with the bot's Discord session.
