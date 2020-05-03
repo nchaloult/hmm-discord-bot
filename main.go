@@ -9,7 +9,10 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-const corporaDirName = "corpora"
+const (
+	corporaDirName = "corpora"
+	maxRetries     = 20
+)
 
 func main() {
 	botname := os.Getenv("BOT_NAME")
@@ -27,7 +30,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to read corpus file: %v\n", err)
 	}
-	hmm := NewHMM(string(content), 5)
+	hmm := NewHMM(string(content), maxRetries)
 
 	// Create a Discord bot and spin it up.
 	bot, err := NewBot(botname, prefix, token, hmm)
