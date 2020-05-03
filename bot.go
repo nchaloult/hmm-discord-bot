@@ -72,11 +72,18 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 	}
 
 	prefixAndName := b.prefix + b.name
-	if strings.HasPrefix(m.Content, prefixAndName) {
-		content := strings.TrimPrefix(m.Content, prefixAndName)
-		// Just echo content for now
-		s.ChannelMessageSend(m.ChannelID, content)
+	if !strings.HasPrefix(m.Content, prefixAndName) {
+		return
 	}
+
+	if len(m.Mentions) > 0 {
+		s.ChannelMessageSend(m.ChannelID, "@'ing people isn't supported yet :(")
+		return
+	}
+
+	content := strings.TrimPrefix(m.Content, prefixAndName)
+	// Just echo content for now
+	s.ChannelMessageSend(m.ChannelID, content)
 }
 
 // addHandlers registers all of this bot's handler functions with the bot's Discord session.
