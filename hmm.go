@@ -15,8 +15,7 @@ type HMM struct {
 	// { "roll": { "up": 0.5,
 	//             "out": 0.5 },
 	//   "up": { "and": 1.0 },
-	//   "and": { "roll": 1.0 },
-	//   "out": { "\n": 1.0 } }
+	//   "and": { "roll": 1.0 }
 	probMap map[string]map[string]float64
 
 	// List of words that appear at the beginning of new lines in the corpus.
