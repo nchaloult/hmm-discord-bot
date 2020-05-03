@@ -12,6 +12,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// msgTooLongErr is a common error that may occur when attempting to post a Discord message. This
+// error is checked for in postDiscordMessage().
+const msgTooLongErr = "HTTP 400 Bad Request, {\"content\": [\"Must be 2000 or fewer in length.\"]}"
+
 // Starter describes objects which perform necessary procedures before spinning up a Discord bot,
 // and then spin up a Discord bot.
 //
@@ -88,7 +92,7 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 	}
 	// If anyone was mentioned in the message, don't mess with it.
 	if len(m.Mentions) > 0 {
-		s.ChannelMessageSend(m.ChannelID, "@'ing people isn't supported yet :(")
+		postDiscordMessage(s, m.ChannelID, "@'ing people isn't supported yet :(")
 		return
 	}
 
@@ -103,8 +107,8 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 
 	// Handle response based on how many arguments were provided in the bot invocation.
 	if numArgs == 0 {
-		response := b.hmm.GenerateSpeech()
-		s.ChannelMessageSend(m.ChannelID, response)
+		msg := b.hmm.GenerateSpeech()
+		postDiscordMessage(s, m.ChannelID, msg)
 		return
 	}
 	if numArgs == 1 {
@@ -114,14 +118,14 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 		if err != nil {
 			// Something went wrong trying to convert the first argument to an int. That means the
 			// first argument is a word that the generated text should start with.
-			response := b.hmm.GenerateSpeechBeginningWithWord(arg)
-			s.ChannelMessageSend(m.ChannelID, response)
+			msg := b.hmm.GenerateSpeechBeginningWithWord(arg)
+			postDiscordMessage(s, m.ChannelID, msg)
 			return
 		}
 		// The string to int conversion was successful. Assume that the number passed in is the
 		// number of words that the generated text should have.
-		response := b.hmm.GenerateSpeechWithNumWords(numWords)
-		s.ChannelMessageSend(m.ChannelID, response)
+		msg := b.hmm.GenerateSpeechWithNumWords(numWords)
+		postDiscordMessage(s, m.ChannelID, msg)
 		return
 	}
 	// len(arguments) is at least 2. If there were more than 2 arguments provided, ignore all of
@@ -130,13 +134,32 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 	numWords, err := strconv.Atoi(arguments[1])
 	if err != nil {
 		// Second argument was not a number. Respond with usage instructions.
-		response := fmt.Sprintf("\"%s\" is not a number. Example usage: `%s"+
+		msg := fmt.Sprintf("\"%s\" is not a number. Example usage: `%s"+
 			" <firstWord> <numWords>`", arguments[1], prefixAndName)
-		s.ChannelMessageSend(m.ChannelID, response)
+		postDiscordMessage(s, m.ChannelID, msg)
 		return
 	}
-	response := b.hmm.GenerateSpeechBeginningWithWordAndWithNumWords(firstWord, numWords)
-	s.ChannelMessageSend(m.ChannelID, response)
+	msg := b.hmm.GenerateSpeechBeginningWithWordAndWithNumWords(firstWord, numWords)
+	postDiscordMessage(s, m.ChannelID, msg)
+}
+
+// postDiscordMessage posts a message in the provided Discord channel as the bot. If anything goes
+// wrong, this function is responsible for handling that problem, most likely by just posting a
+// message in Discord about what happened.
+func postDiscordMessage(session *discordgo.Session, channelID, msg string) {
+	_, err := session.ChannelMessageSend(channelID, msg)
+	if err != nil {
+		// See if the error is a common one that we recognize.
+		if err.Error() == msgTooLongErr {
+			errMsg := "The generated message was too long. Discord doesn't let messages that are" +
+				" longer than 2000 characters go through."
+			session.ChannelMessageSend(channelID, errMsg)
+			return
+		}
+		// We didn't recognize the error at this point. Post a general response.
+		errMsg := fmt.Sprintf("Something went wrong: %v", err)
+		session.ChannelMessageSend(channelID, errMsg)
+	}
 }
 
 // addHandlers registers all of this bot's handler functions with the bot's Discord session.
