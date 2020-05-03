@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"regexp"
@@ -65,14 +66,14 @@ func (b *Bot) Start() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Bot is up & running. Press Ctrl+C to shut it down.")
+	log.Println("Bot is up & running. Press Ctrl+C to shut it down.")
 
 	// Block until Ctrl+C is pressed, or the process is interrupted or terminated.
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
-	fmt.Println("\nSpinning down....")
+	log.Println("Spinning down....")
 	b.dg.Close()
 	return nil
 }
