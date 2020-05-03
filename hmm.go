@@ -82,6 +82,11 @@ func (h *HMM) GenerateSpeechWithNumWords(numWords int) string {
 	for i := 0; i < numWords; i++ {
 		speech = append(speech, curWord)
 		curWord = getNextWord(curWord, h.probMap)
+
+		// If we roll a newline char, keep rolling until we don't get a newline.
+		for curWord == "\n" {
+			curWord = getNextWord(curWord, h.probMap)
+		}
 	}
 
 	output := strings.Join(speech, " ")
@@ -123,6 +128,11 @@ func (h *HMM) GenerateSpeechBeginningWithWordAndWithNumWords(firstWord string, n
 	for i := 0; i < numWords; i++ {
 		speech = append(speech, curWord)
 		curWord = getNextWord(curWord, h.probMap)
+
+		// If we roll a newline char, keep rolling until we don't get a newline.
+		for curWord == "\n" {
+			curWord = getNextWord(curWord, h.probMap)
+		}
 	}
 
 	output := strings.Join(speech, " ")
