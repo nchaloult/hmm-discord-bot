@@ -76,6 +76,9 @@ func (h *HMM) GenerateSpeechWithNumWords(numWords int) string {
 	var speech []string
 
 	n := len(h.firstWords)
+	if n < 1 {
+		return ""
+	}
 	curWord := h.firstWords[rand.Intn(n)]
 
 	for i := 0; i < numWords; i++ {
