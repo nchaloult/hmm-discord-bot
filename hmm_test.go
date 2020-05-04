@@ -173,3 +173,88 @@ func TestGenerateSpeechBeginningWithWord(t *testing.T) {
 		}
 	}
 }
+
+func TestGenerateSpeechBeginningWithWordAndWithNumWords(t *testing.T) {
+	tests := []struct {
+		corpus             string
+		maxRetries         int
+		firstWordWant      string
+		numWordsToGenerate int
+		numWordsWant       int
+	}{
+		{
+			"the quick brown fox jumps over the lazy dog.\n",
+			42, "lazy", 42, 42,
+		},
+		{
+			"the quick brown fox\njumps over the lazy dog.\n",
+			42, "lazy", 42, 42,
+		},
+		{
+			"the quick brown fox jumps over the lazy dog.\n",
+			42, "foo", 42, 42,
+		},
+		{
+			"the quick brown fox\njumps over the lazy dog.\n",
+			42, "foo", 42, 42,
+		},
+		{
+			"the quick brown fox jumps over the lazy dog.\n",
+			42, "lazy", 0, 0,
+		},
+		{
+			"the quick brown fox\njumps over the lazy dog.\n",
+			42, "lazy", 0, 0,
+		},
+		{
+			"the quick brown fox jumps over the lazy dog.\n",
+			42, "foo", 0, 0,
+		},
+		{
+			"the quick brown fox\njumps over the lazy dog.\n",
+			42, "foo", 0, 0,
+		},
+		{
+			"the quick brown fox jumps over the lazy dog.\n",
+			42, "lazy", -1, 0,
+		},
+		{
+			"the quick brown fox\njumps over the lazy dog.\n",
+			42, "lazy", -1, 0,
+		},
+		{
+			"the quick brown fox jumps over the lazy dog.\n",
+			42, "foo", -1, 0,
+		},
+		{
+			"the quick brown fox\njumps over the lazy dog.\n",
+			42, "foo", -1, 0,
+		},
+	}
+	for _, c := range tests {
+		hmm, _ := NewHMM(c.corpus, c.maxRetries)
+		speech := hmm.GenerateSpeechBeginningWithWordAndWithNumWords(c.firstWordWant, c.numWordsToGenerate)
+
+		got := len(strings.Fields(speech))
+		if got != c.numWordsWant {
+			t.Errorf("Unexpected speech length. got %d, want: %d\n",
+				got, c.numWordsWant)
+		}
+		if c.numWordsWant == 0 {
+			// We're expecting an empty string, and we got it. We're done with this test case.
+			continue
+		}
+
+		// Get first word from speech
+		firstSpaceIndex := strings.Index(speech, " ")
+		if firstSpaceIndex == -1 {
+			firstSpaceIndex = len(speech)
+		}
+		firstWord := speech[:firstSpaceIndex]
+
+		if firstWord != c.firstWordWant {
+			t.Errorf("Unexpected first word in generated speech. Got: %q, want: %q\n",
+				firstWord, c.firstWordWant)
+		}
+	}
+}
