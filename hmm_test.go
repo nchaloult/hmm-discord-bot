@@ -132,3 +132,44 @@ func TestGenerateSpeechWithNumWords(t *testing.T) {
 		}
 	}
 }
+
+func TestGenerateSpeechBeginningWithWord(t *testing.T) {
+	tests := []struct {
+		corpus        string
+		maxRetries    int
+		firstWordWant string
+	}{
+		{
+			"the quick brown fox jumps over the lazy dog.\n",
+			42, "lazy",
+		},
+		{
+			"the quick brown fox\njumps over the lazy dog.\n",
+			42, "lazy",
+		},
+		{
+			"the quick brown fox jumps over the lazy dog.\n",
+			42, "foo",
+		},
+		{
+			"the quick brown fox\njumps over the lazy dog.\n",
+			42, "foo",
+		},
+	}
+	for _, c := range tests {
+		hmm, _ := NewHMM(c.corpus, c.maxRetries)
+		speech := hmm.GenerateSpeechBeginningWithWord(c.firstWordWant)
+
+		// Get first word from speech
+		firstSpaceIndex := strings.Index(speech, " ")
+		if firstSpaceIndex == -1 {
+			firstSpaceIndex = len(speech)
+		}
+		firstWord := speech[:firstSpaceIndex]
+
+		if firstWord != c.firstWordWant {
+			t.Errorf("Unexpected first word in generated speech. Got: %q, want: %q\n",
+				firstWord, c.firstWordWant)
+		}
+	}
+}
