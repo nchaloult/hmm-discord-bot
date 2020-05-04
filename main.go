@@ -30,7 +30,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to read corpus file: %v\n", err)
 	}
-	hmm := NewHMM(string(content), maxRetries)
+	hmm, err := NewHMM(string(content), maxRetries)
+	if err != nil {
+		log.Fatalf("Failed to create a new HMM object: %v\n", err)
+	}
 
 	// Create a Discord bot and spin it up.
 	bot, err := NewBot(botname, prefix, token, hmm)

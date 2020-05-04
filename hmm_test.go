@@ -14,6 +14,7 @@ func TestHMMCreation(t *testing.T) {
 		maxRetries     int
 		probMapWant    map[string]map[string]float64
 		firstWordsWant []string
+		expectedErr    error
 	}{
 		{
 			"roll up and roll out",
@@ -24,6 +25,7 @@ func TestHMMCreation(t *testing.T) {
 				"and":  {"roll": 1.0},
 			},
 			[]string{"roll"},
+			nil,
 		},
 		{
 			"keep it sweet, keep it simple, and keep your cool",
@@ -37,6 +39,7 @@ func TestHMMCreation(t *testing.T) {
 				"your":    {"cool": 1.0},
 			},
 			[]string{"keep"},
+			nil,
 		},
 		{
 			"multiline\ncorpus",
@@ -46,16 +49,34 @@ func TestHMMCreation(t *testing.T) {
 				"\n":        {"corpus": 1.0},
 			},
 			[]string{"multiline", "corpus"},
+			nil,
 		},
 		{
 			"",
 			0,
 			map[string]map[string]float64{},
 			[]string{},
+			ErrEmtpyCorpus,
+		},
+		{
+			"foo",
+			-1,
+			map[string]map[string]float64{},
+			[]string{},
+			ErrNegMaxRetries,
 		},
 	}
 	for _, c := range tests {
-		got := NewHMM(c.corpus, c.maxRetries)
+		got, err := NewHMM(c.corpus, c.maxRetries)
+		if (err == nil && c.expectedErr != nil) || (err != nil && c.expectedErr == nil) ||
+			(c.expectedErr != nil && err != c.expectedErr) {
+			t.Fatalf("Unexpected error. got: %v\nwant: %v\n", err, c.expectedErr)
+		}
+		if c.expectedErr != nil && err == c.expectedErr {
+			// We expected a specific error, and we got that error. We're done with this test case.
+			continue
+		}
+
 		if !reflect.DeepEqual(got.probMap, c.probMapWant) {
 			t.Errorf("Unexpected probMap generated from: %q\ngot: %v\nwant: %v\n",
 				c.corpus,
@@ -99,13 +120,9 @@ func TestGenerateSpeechWithNumWords(t *testing.T) {
 			"the quick brown fox\njumps over the lazy dog.\n",
 			20, 42, 42,
 		},
-		{
-			"",
-			20, 42, 0,
-		},
 	}
 	for _, c := range tests {
-		hmm := NewHMM(c.corpus, c.maxRetries)
+		hmm, _ := NewHMM(c.corpus, c.maxRetries)
 		speech := hmm.GenerateSpeechWithNumWords(c.numWordsToGenerate)
 		got := len(strings.Fields(speech))
 

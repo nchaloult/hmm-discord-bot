@@ -1,9 +1,16 @@
 package main
 
 import (
+	"errors"
 	"math/rand"
 	"strings"
 	"time"
+)
+
+// Custom errors
+var (
+	ErrEmtpyCorpus   = errors.New("corpus cannot be an empty string")
+	ErrNegMaxRetries = errors.New("maxRetries must be greater than 0")
 )
 
 // HMM generates pieces of text with the same vocabulary and sentence structure as a corpus file. A
@@ -27,7 +34,14 @@ type HMM struct {
 }
 
 // NewHMM returns a new HMM with fields populated based on the provided corpus file.
-func NewHMM(corpus string, maxRetries int) *HMM {
+func NewHMM(corpus string, maxRetries int) (*HMM, error) {
+	if len(corpus) < 1 {
+		return nil, ErrEmtpyCorpus
+	}
+	if maxRetries < 1 {
+		return nil, ErrNegMaxRetries
+	}
+
 	words := getWords(corpus)
 	probMap, firstWords := buildHMMFields(words)
 
@@ -39,7 +53,7 @@ func NewHMM(corpus string, maxRetries int) *HMM {
 		probMap:    probMap,
 		firstWords: firstWords,
 		maxRetries: maxRetries,
-	}
+	}, nil
 }
 
 // GenerateSpeech returns a piece of generated text. After it finishes generating a sentence, a
@@ -76,9 +90,6 @@ func (h *HMM) GenerateSpeechWithNumWords(numWords int) string {
 	var speech []string
 
 	n := len(h.firstWords)
-	if n < 1 {
-		return ""
-	}
 	curWord := h.firstWords[rand.Intn(n)]
 
 	for i := 0; i < numWords; i++ {
@@ -162,10 +173,6 @@ func getWords(corpus string) []string {
 
 // buildHMMFields builds an HMM's prob field and firstWords field from a provided slice of words.
 func buildHMMFields(words []string) (map[string]map[string]float64, []string) {
-	if len(words) < 1 {
-		return make(map[string]map[string]float64, 0), make([]string, 0)
-	}
-
 	freqMap := make(map[string]map[string]int)
 	firstWords := []string{words[0]}
 	// Populate freqMap and firstWords
