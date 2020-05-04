@@ -90,7 +90,7 @@ func TestHMMCreation(t *testing.T) {
 				c.firstWordsWant)
 		}
 		if got.maxRetries != c.maxRetries {
-			t.Errorf("NewHMM() returned HMM struct with unexpected maxRetries\ngot: %d, want%d\n",
+			t.Errorf("Unexpected maxRetries. got: %d, want%d\n",
 				got.maxRetries,
 				c.maxRetries)
 		}
@@ -127,8 +127,8 @@ func TestGenerateSpeechWithNumWords(t *testing.T) {
 		got := len(strings.Fields(speech))
 
 		if got != c.numWordsWant {
-			t.Errorf("GenerateSpeechWithNumWords(%d) generated speech with unexpected length: %d\n",
-				c.numWordsWant, got)
+			t.Errorf("Unexpected speech length. got: %d, want: %d\n",
+				got, c.numWordsWant)
 		}
 	}
 }
@@ -168,7 +168,7 @@ func TestGenerateSpeechBeginningWithWord(t *testing.T) {
 		firstWord := speech[:firstSpaceIndex]
 
 		if firstWord != c.firstWordWant {
-			t.Errorf("Unexpected first word in generated speech. Got: %q, want: %q\n",
+			t.Errorf("Unexpected first word in generated speech. got: %q, want: %q\n",
 				firstWord, c.firstWordWant)
 		}
 	}
@@ -253,7 +253,7 @@ func TestGenerateSpeechBeginningWithWordAndWithNumWords(t *testing.T) {
 		firstWord := speech[:firstSpaceIndex]
 
 		if firstWord != c.firstWordWant {
-			t.Errorf("Unexpected first word in generated speech. Got: %q, want: %q\n",
+			t.Errorf("Unexpected first word in generated speech. got: %q, want: %q\n",
 				firstWord, c.firstWordWant)
 		}
 	}
