@@ -28,6 +28,34 @@ func TestHMMCreation(t *testing.T) {
 			[]string{"roll"},
 		},
 		{
+			"keep it sweet, keep it simple, and keep your cool",
+			10,
+			map[string]map[string]float64{
+				"keep": map[string]float64{
+					"it":   2.0 / 3,
+					"your": 1.0 / 3,
+				},
+				"it": map[string]float64{
+					"sweet,":  0.5,
+					"simple,": 0.5,
+				},
+				"sweet,":  map[string]float64{"keep": 1.0},
+				"simple,": map[string]float64{"and": 1.0},
+				"and":    map[string]float64{"keep": 1.0},
+				"your":   map[string]float64{"cool": 1.0},
+			},
+			[]string{"keep"},
+		},
+		{
+			"multiline\ncorpus",
+			10,
+			map[string]map[string]float64{
+				"multiline": map[string]float64{ "\n": 1.0 },
+				"\n": map[string]float64{ "corpus": 1.0 },
+			},
+			[]string{"multiline", "corpus"},
+		},
+		{
 			"",
 			0,
 			map[string]map[string]float64{},
