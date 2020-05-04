@@ -50,7 +50,7 @@ func TestHMMCreation(t *testing.T) {
 			"",
 			0,
 			map[string]map[string]float64{},
-			[]string{""},
+			[]string{},
 		},
 	}
 	for _, c := range tests {

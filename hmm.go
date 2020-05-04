@@ -145,11 +145,24 @@ func (h *HMM) GenerateSpeechBeginningWithWordAndWithNumWords(firstWord string, n
 func getWords(corpus string) []string {
 	paddedNewlines := strings.ReplaceAll(corpus, "\n", " \n ")
 	lowercase := strings.ToLower(paddedNewlines)
-	return strings.Split(lowercase, " ")
+	words := strings.Split(lowercase, " ")
+
+	// Get rid of empty strings in word list
+	var output []string
+	for _, word := range words {
+		if word != "" {
+			output = append(output, word)
+		}
+	}
+	return output
 }
 
 // buildHMMFields builds an HMM's prob field and firstWords field from a provided slice of words.
 func buildHMMFields(words []string) (map[string]map[string]float64, []string) {
+	if len(words) < 1 {
+		return make(map[string]map[string]float64, 0), make([]string, 0)
+	}
+
 	freqMap := make(map[string]map[string]int)
 	firstWords := []string{words[0]}
 	// Populate freqMap and firstWords
