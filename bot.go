@@ -80,9 +80,9 @@ func (b *Bot) Start() error {
 	return nil
 }
 
-// messageCreateHandler is called every time a new message is posted in a a channel that the bot has
+// MessageCreateHandler is called every time a new message is posted in a a channel that the bot has
 // access to.
-func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (b *Bot) MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore all messages posted by the bot.
 	// Just to save CPU cycles, even though they're cheap ;)
 	if m.Author.ID == s.State.User.ID {
@@ -132,6 +132,11 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 		}
 		// The string to int conversion was successful. Assume that the number passed in is the
 		// number of words that the generated text should have.
+		if numWords == 0 {
+			msg := "Can't post an empty message"
+			b.postFN(s, m.ChannelID, msg)
+			return
+		}
 		msg := b.hmm.GenerateSpeechWithNumWords(numWords)
 		b.postFN(s, m.ChannelID, msg)
 		return
@@ -142,8 +147,13 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 	numWords, err := strconv.Atoi(arguments[1])
 	if err != nil {
 		// Second argument was not a number. Respond with usage instructions.
-		msg := fmt.Sprintf("\"%s\" is not a number. Example usage: `%s"+
+		msg := fmt.Sprintf("%q is not a number. Example usage: `%s"+
 			" <firstWord> <numWords>`", arguments[1], prefixAndName)
+		b.postFN(s, m.ChannelID, msg)
+		return
+	}
+	if numWords == 0 {
+		msg := "Can't post an empty message"
 		b.postFN(s, m.ChannelID, msg)
 		return
 	}
@@ -178,5 +188,5 @@ func postDiscordMessage(session *discordgo.Session, channelID, msg string) {
 
 // addHandlers registers all of this bot's handler functions with the bot's Discord session.
 func (b *Bot) addHandlers() {
-	b.dg.AddHandler(b.messageCreateHandler)
+	b.dg.AddHandler(b.MessageCreateHandler)
 }
