@@ -28,6 +28,7 @@ type Starter interface {
 // Bot establishes a new Discord session and is invoked by commands in Discord messages.
 type Bot struct {
 	dg            *discordgo.Session
+	postFN        MsgPoster
 	name          string
 	prefix        string
 	hmm           *HMM
@@ -51,6 +52,7 @@ func NewBot(name, prefix, token string, hmm *HMM) (*Bot, error) {
 
 	return &Bot{
 		dg:            dg,
+		postFN:        postDiscordMessage,
 		name:          name,
 		prefix:        prefix,
 		hmm:           hmm,
@@ -93,7 +95,7 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 	}
 	// If anyone was mentioned in the message, don't mess with it.
 	if len(m.Mentions) > 0 {
-		postDiscordMessage(s, m.ChannelID, "@'ing people isn't supported yet :(")
+		b.postFN(s, m.ChannelID, "@'ing people isn't supported yet :(")
 		return
 	}
 
@@ -114,7 +116,7 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 	// Handle response based on how many arguments were provided in the bot invocation.
 	if numArgs == 0 {
 		msg := b.hmm.GenerateSpeech()
-		postDiscordMessage(s, m.ChannelID, msg)
+		b.postFN(s, m.ChannelID, msg)
 		return
 	}
 	if numArgs == 1 {
@@ -125,13 +127,13 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 			// Something went wrong trying to convert the first argument to an int. That means the
 			// first argument is a word that the generated text should start with.
 			msg := b.hmm.GenerateSpeechBeginningWithWord(arg)
-			postDiscordMessage(s, m.ChannelID, msg)
+			b.postFN(s, m.ChannelID, msg)
 			return
 		}
 		// The string to int conversion was successful. Assume that the number passed in is the
 		// number of words that the generated text should have.
 		msg := b.hmm.GenerateSpeechWithNumWords(numWords)
-		postDiscordMessage(s, m.ChannelID, msg)
+		b.postFN(s, m.ChannelID, msg)
 		return
 	}
 	// len(arguments) is at least 2. If there were more than 2 arguments provided, ignore all of
@@ -142,16 +144,22 @@ func (b *Bot) messageCreateHandler(s *discordgo.Session, m *discordgo.MessageCre
 		// Second argument was not a number. Respond with usage instructions.
 		msg := fmt.Sprintf("\"%s\" is not a number. Example usage: `%s"+
 			" <firstWord> <numWords>`", arguments[1], prefixAndName)
-		postDiscordMessage(s, m.ChannelID, msg)
+		b.postFN(s, m.ChannelID, msg)
 		return
 	}
 	msg := b.hmm.GenerateSpeechBeginningWithWordAndWithNumWords(firstWord, numWords)
-	postDiscordMessage(s, m.ChannelID, msg)
+	b.postFN(s, m.ChannelID, msg)
 }
+
+// MsgPoster describes functions that send messages to specified Discord channels. This type exists
+// mainly so that postDiscordMessage() can be mocked in tests.
+type MsgPoster func(*discordgo.Session, string, string)
 
 // postDiscordMessage posts a message in the provided Discord channel as the bot. If anything goes
 // wrong, this function is responsible for handling that problem, most likely by just posting a
 // message in Discord about what happened.
+//
+// postDiscordMessage is of the custom type: MsgPoster
 func postDiscordMessage(session *discordgo.Session, channelID, msg string) {
 	_, err := session.ChannelMessageSend(channelID, msg)
 	if err != nil {
