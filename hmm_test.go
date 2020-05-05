@@ -7,7 +7,7 @@ import (
 )
 
 // TestHMMCreation makes sure that NewHMM() is returning HMM structs with expected fields. In other
-// words, we're effectivley testing the functionality of getWords() and buildHMMFields() in hmm.go.
+// words, we're effectively testing the functionality of getWords() and buildHMMFields() in hmm.go.
 func TestHMMCreation(t *testing.T) {
 	tests := []struct {
 		corpus         string
