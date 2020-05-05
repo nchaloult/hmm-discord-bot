@@ -1,5 +1,7 @@
 # hmm-discord-bot
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/nchaloult/hmm-discord-bot)](https://goreportcard.com/report/github.com/nchaloult/hmm-discord-bot)
+
 A Discord bot that generates messages of the same vocabulary and sentence structure as a provided
 corpus.
 
