@@ -30,7 +30,7 @@ When invoking the bot with the configured name and prefix, it supports the follo
 
 The bot may be configured with a name and a prefix. These two things are what users type in Discord messages to invoke the bot. For instance, in the screenshot above, the bot's configured name is "obama", and its prefix is "!".
 
-The bot also needs to be configured with the name of a corpus file to train an HMM on, as well as a Discord API token. That corpus file needs to live in the `/corpora` directory. Instructions for provisioning an API token for a Discord bot can be found [here](https://discordpy.readthedocs.io/en/latest/discord.html).
+The bot also needs to be configured with the name of a corpus file to train an HMM on, as well as a Discord API token. That corpus file needs to live in the `/corpora` directory. You may read more about corpus files in this repo [here](corpora/README.md). Instructions for provisioning an API token for a Discord bot can be found [here](https://discordpy.readthedocs.io/en/latest/discord.html).
 
 All four of those configurable items are kept in environment variables. If you want to deploy an instance of this bot and bring it into a Discord server that you're a part of, you'll need to set those environment variables in whatever deployment environment you end up working with. See the [`.env.sample`](.env.sample) file for which environment variables you'll need to set.
 
@@ -42,7 +42,7 @@ All four of those configurable items are kept in environment variables. If you w
         * If you do this, then you'll need to replace the `BOT_TOKEN` var with your own bot's token
     * Or `$ touch .env` and fill that file up yourself
 1. Place your corpus file(s) in the `/corpora` dir
-    * See the README in `/corpora` for more info about corpus files
+    * See the [README](corpora/README.md) in `/corpora` for more info about corpus files
     * tl;dr: an example corpus file is provided if you just wanna look at that or use it
 1. Spin up the program
     * `$ go run *.go`
