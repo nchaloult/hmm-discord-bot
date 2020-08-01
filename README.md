@@ -26,6 +26,14 @@ When invoking the bot with the configured name and prefix, it supports the follo
 - `<beginning-word> <num-words>`: generates a message with the provided number of words AND that starts with the provided word
     - Ex: `!botname america 40`
 
+## Configuration
+
+The bot may be configured with a name and a prefix. These two things are what users type in Discord messages to invoke the bot. For instance, in the screenshot above, the bot's configured name is "obama", and its prefix is "!".
+
+The bot also needs to be configured with the name of a corpus file to train an HMM on, as well as a Discord API token. That corpus file needs to live in the `/corpora` directory. Instructions for provisioning an API token for a Discord bot can be found [here](https://discordpy.readthedocs.io/en/latest/discord.html).
+
+All four of those configurable items are kept in environment variables. If you want to deploy an instance of this bot and bring it into a Discord server that you're a part of, you'll need to set those environment variables in whatever deployment environment you end up working with. See the [`.env.sample`](.env.sample) file for which environment variables you'll need to set.
+
 ## Initial Setup
 
 1. Create a `.env` file in the root dir of this project
