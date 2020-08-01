@@ -6,6 +6,10 @@
 A Discord bot that generates messages of the same vocabulary and sentence structure as a provided
 corpus.
 
+A [hidden Markov model](https://en.wikipedia.org/wiki/Hidden_Markov_model) is used to generate
+messages. For speech generation, HMMs are notoriously mediocre, but I think that's part of the fun!
+:) This bot can pump out some hilarious garbage sometimes.
+
 <img width="818" alt="Screen shot that showcases the Discord bot in action" src="https://user-images.githubusercontent.com/31291920/89092797-efc38980-d382-11ea-98cd-5e65949a9671.png">
 
 ## Initial Setup
