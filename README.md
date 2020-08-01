@@ -12,6 +12,20 @@ messages. For speech generation, HMMs are notoriously mediocre, but I think that
 
 <img width="818" alt="Screen shot that showcases the Discord bot in action" src="https://user-images.githubusercontent.com/31291920/89092797-efc38980-d382-11ea-98cd-5e65949a9671.png">
 
+## Supported Commands
+
+When invoking the bot with the configured name and prefix, it supports the following argument patterns:
+
+- No arguments: generates a message of unknown length until the HMM decides that the message should end
+    - Ex: `!botname`
+- `<num-words>`: generates a message with the provided number of words
+    - Ex: `!botname 40`
+- `<beginning-word>`: generates a message that starts with the provided word
+    - Ex: `!botname america`
+    - The provided `<beginning-word>` does NOT need to be in the corpus file that the HMM is trained on, although the results you get are often better if it is
+- `<beginning-word> <num-words>`: generates a message with the provided number of words AND that starts with the provided word
+    - Ex: `!botname america 40`
+
 ## Initial Setup
 
 1. Create a `.env` file in the root dir of this project
