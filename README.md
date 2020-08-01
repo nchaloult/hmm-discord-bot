@@ -6,6 +6,8 @@
 A Discord bot that generates messages of the same vocabulary and sentence structure as a provided
 corpus.
 
+<img width="818" alt="Screen shot that showcases the Discord bot in action" src="https://user-images.githubusercontent.com/31291920/89092797-efc38980-d382-11ea-98cd-5e65949a9671.png">
+
 ## Initial Setup
 
 1. Create a `.env` file in the root dir of this project
